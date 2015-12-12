@@ -1,23 +1,45 @@
+Weeks = new Mongo.Collection('weeks');
+
 if (Meteor.isClient) {
-  // counter starts at 0
-  Session.setDefault('counter', 0);
-
-  Template.hello.helpers({
-    counter: function () {
-      return Session.get('counter');
-    }
+  // This code only runs on the client
+  Template.body.helpers({
+    weeks:function() {
+      return Weeks.find({deleted: {$ne: true}}, {sort: {createdAt: -1}});
+    },
   });
 
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set('counter', Session.get('counter') + 1);
-    }
-  });
-}
+  Template.body.events({
+    'submit .new-week': function(event) {
+      // Prevent default browser form submit
+      event.preventDefault();
 
-if (Meteor.isServer) {
-  Meteor.startup(function () {
-    // code to run on server at startup
+      // Get value from form element
+      var text = event.target.text.value;
+
+      // Insert a week into the collection
+      Weeks.insert({
+        text: text,
+        createdAt: new Date(), // current time
+      });
+
+      // Clear form
+      event.target.text.value = '';
+    },
+  });
+
+  Template.week.events({
+    'click .toggle-checked': function() {
+      // Set the checked property to the opposite of its current value
+      Weeks.update(this._id, {
+        $set: {checked: !this.checked},
+      });
+    },
+
+    'click .delete': function() {
+      // SOFT DELETE
+      Weeks.update(this._id, {
+        $set: {deleted: true},
+      });
+    },
   });
 }

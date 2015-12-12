@@ -1,14 +1,32 @@
 <head>
-  <title>tendertasker</title>
+  <title>Tendertasker</title>
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
 
-  {{> hello}}
+  <div class="container">
+    <header>
+      <h1>Welcome to Tendertasker!</h1>
+    </header>
+
+    <form class="new-week">
+      <input type="text" name="text" placeholder="Type to add new weeks" />
+    </form>
+
+    <ul>
+      {{#each weeks}}
+        {{> week}}
+      {{/each}}
+    </ul>
+  </div>
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="week">
+  <li class="{{#if checked}}checked{{/if}}">
+   <button class="delete">&times;</button>
+
+   <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
+
+   <span class="text">{{text}}</span>
+ </li>
 </template>
