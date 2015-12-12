@@ -4,7 +4,16 @@ if (Meteor.isClient) {
   // This code only runs on the client
   Template.body.helpers({
     weeks:function() {
-      return Weeks.find({deleted: {$ne: true}}, {sort: {createdAt: -1}});
+      if (Session.get('hideCompleted')) {
+        return Weeks.find({deleted: {$ne: true}, checked: {$ne: true}}, {sort: {createdAt: -1}});
+
+      } else {
+        return Weeks.find({deleted: {$ne: true}}, {sort: {createdAt: -1}});
+      }
+    },
+
+    hideCompleted: function() {
+      return Session.get('hideCompleted');
     },
   });
 
@@ -24,6 +33,10 @@ if (Meteor.isClient) {
 
       // Clear form
       event.target.text.value = '';
+    },
+
+    'change .hide-completed input': function (event) {
+      Session.set('hideCompleted', event.target.checked);
     },
   });
 
