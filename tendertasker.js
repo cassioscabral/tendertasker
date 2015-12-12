@@ -1,6 +1,15 @@
 Weeks = new Mongo.Collection('weeks');
 
+if (Meteor.isServer) {
+  // This code only runs on the server
+  Meteor.publish('weeks', function() {
+    return Weeks.find({ owner: this.userId });
+  });
+}
+
 if (Meteor.isClient) {
+  Meteor.subscribe('weeks');
+
   // This code only runs on the client
   Template.body.helpers({
     weeks:function() {
@@ -57,7 +66,7 @@ if (Meteor.isClient) {
 
 Meteor.methods({
   addWeek: function(text) {
-    // Make sure the user is logged in before inserting a task
+    // Make sure the user is logged in before inserting a week
     if (!Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
