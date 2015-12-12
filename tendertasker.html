@@ -13,10 +13,13 @@
       <input type="checkbox" checked="{{hideCompleted}}" />
       Hide Completed Weeks
     </label>
+    {{> loginButtons}}
 
-    <form class="new-week">
-      <input type="text" name="text" placeholder="Type to add new weeks" />
-    </form>
+    {{#if currentUser}}
+      <form class="new-task">
+        <input type="text" name="text" placeholder="Type to add new tasks" />
+      </form>
+    {{/if}}
 
     <ul>
       {{#each weeks}}

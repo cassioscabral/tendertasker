@@ -26,16 +26,13 @@ if (Meteor.isClient) {
       var text = event.target.text.value;
 
       // Insert a week into the collection
-      Weeks.insert({
-        text: text,
-        createdAt: new Date(), // current time
-      });
+      Meteor.call('addWeek', text);
 
       // Clear form
       event.target.text.value = '';
     },
 
-    'change .hide-completed input': function (event) {
+    'change .hide-completed input': function(event) {
       Session.set('hideCompleted', event.target.checked);
     },
   });
@@ -43,16 +40,43 @@ if (Meteor.isClient) {
   Template.week.events({
     'click .toggle-checked': function() {
       // Set the checked property to the opposite of its current value
-      Weeks.update(this._id, {
-        $set: {checked: !this.checked},
-      });
+      Meteor.call('setChecked', this._id, !this.checked);
     },
 
     'click .delete': function() {
       // SOFT DELETE
-      Weeks.update(this._id, {
-        $set: {deleted: true},
-      });
+      Meteor.call('deleteWeek', this._id);
     },
   });
+
+  Accounts.ui.config({
+    passwordSignupFields: 'USERNAME_ONLY',
+  });
+
 }
+
+Meteor.methods({
+  addWeek: function(text) {
+    // Make sure the user is logged in before inserting a task
+    if (!Meteor.userId()) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    Weeks.insert({
+      text: text,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meteor.user().username,
+    });
+  },
+
+  deleteWeek: function(weekId) {
+    Weeks.update(weekId, {
+      $set: {deleted: true},
+    });
+  },
+
+  setChecked: function(weekId, setChecked) {
+    Weeks.update(weekId, { $set: { checked: setChecked} });
+  },
+});
