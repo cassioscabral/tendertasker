@@ -41,16 +41,22 @@
   </li>
 </template>
 
+<template name="createTask">
+  {{#if currentUser}}
+    parent_id: {{parent_id}}
+    <form class="new-task">
+      <input type="text" name="text" placeholder="Type to add new task" />
+      <input type="number" name="percentage" placeholder="80" min="0" max="100" required="true"/>
+      <input type="submit" class="btn btn-success" name="submit" value="OK">
+    </form>
+  {{/if}}
+</template>
+
 <template name="weekInfo">
   <div class="week-info disabled">
+    <h1>week_id: {{this._id}}</h1>
     <h2>Total time: {{total_hours}}</h2>
-    {{#if currentUser}}
-      <form class="new-task">
-        <input type="text" name="text" placeholder="Type to add new task" />
-        <input type="number" name="percentage" placeholder="80" min="0" max="100" required="true"/>
-        <input type="submit" class="btn btn-success" name="submit" value="OK">
-      </form>
-    {{/if}}
+    {{> createTask week_id=this._id}}
     {{#each tasks}}
       {{> task}}
     {{/each}}
@@ -58,7 +64,8 @@
 </template>
 
 <template name="task">
-  <div class="bar-container">
+  <div class="bar-container" style="margin-left: {{margin}};">
+    margin: {{margin}}
     <span>{{text}}</span>
     <button class="delete-task">&times;</button>
     <div class="progress">
@@ -66,5 +73,13 @@
         {{percentage}}%
       </div>
     </div>
+    {{> createTask week_id=this.week_id parent_id=this._id}}
+    {{#if subTasks}}
+      {{#each subTasks}}
+        {{> task margin='10px'}}
+      {{/each}}
+    {{/if}}
   </div>​
+  <br>
+  <br>
 </template>

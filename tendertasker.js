@@ -34,12 +34,14 @@ if (Meteor.isClient) {
 
   Template.weekInfo.helpers({
     tasks: function() {
-      return Tasks.find({}); // TODO pull only from the selected week
+      return Tasks.find({week_id: this._id, parent_id: {$ne: true} }); // TODO pull only from the selected week
     },
   });
 
   Template.task.helpers({
-
+    subTasks: function() {
+      return Tasks.find({week_id: this.week_id, parent_id: this._id});
+    },
   });
 
   Template.task.events({
@@ -66,13 +68,15 @@ if (Meteor.isClient) {
     'submit .new-task': function(event) {
       // Prevent default browser form submit
       event.preventDefault();
-
+      event.stopImmediatePropagation();
       // Get value from form element
       var text = event.target.text.value;
       var percentage = event.target.percentage.value;
+      var week_id = this.week_id;
+      var parent_id = this.parent_id;
 
       // Insert a week into the collection
-      Meteor.call('addTask', text, percentage);
+      Meteor.call('addTask', text, percentage, week_id, parent_id);
 
       // Clear form
       event.target.text.value = '';
@@ -128,7 +132,7 @@ Meteor.methods({
   },
 
   // TASK
-  addTask: function(text, percentage) {
+  addTask: function(text, percentage, week_id, parent_id) {
     // Make sure the user is logged in before inserting a week
     if (!Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
@@ -140,6 +144,8 @@ Meteor.methods({
       createdAt: new Date(),
       owner: Meteor.userId(),
       username: Meteor.user().username,
+      week_id: week_id,
+      parent_id: parent_id
     });
   },
 
