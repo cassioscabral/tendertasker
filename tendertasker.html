@@ -32,10 +32,39 @@
 
 <template name="week">
   <li class="{{#if checked}}checked{{/if}}">
-   <button class="delete">&times;</button>
+    <button class="delete-week">&times;</button>
 
-   <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
+    <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
 
-   <span class="text">{{text}}</span>
- </li>
+    <span class="text">{{text}}</span>
+    {{> weekInfo}}
+  </li>
+</template>
+
+<template name="weekInfo">
+  <div class="week-info disabled">
+    <h2>Total time: {{total_hours}}</h2>
+    {{#if currentUser}}
+      <form class="new-task">
+        <input type="text" name="text" placeholder="Type to add new task" />
+        <input type="number" name="percentage" placeholder="80" min="0" max="100" required="true"/>
+        <input type="submit" class="btn btn-success" name="submit" value="OK">
+      </form>
+    {{/if}}
+    {{#each tasks}}
+      {{> task}}
+    {{/each}}
+  </div>
+</template>
+
+<template name="task">
+  <div class="bar-container">
+    <span>{{text}}</span>
+    <button class="delete-task">&times;</button>
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width: {{percentage}}%;">
+        {{percentage}}%
+      </div>
+    </div>
+  </div>​
 </template>

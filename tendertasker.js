@@ -1,14 +1,20 @@
 Weeks = new Mongo.Collection('weeks');
+Tasks = new Mongo.Collection('tasks');
 
 if (Meteor.isServer) {
   // This code only runs on the server
   Meteor.publish('weeks', function() {
     return Weeks.find({ owner: this.userId });
   });
+
+  Meteor.publish('tasks', function() {
+    return Tasks.find({ owner: this.userId });
+  });
 }
 
 if (Meteor.isClient) {
   Meteor.subscribe('weeks');
+  Meteor.subscribe('tasks');
 
   // This code only runs on the client
   Template.body.helpers({
@@ -23,6 +29,22 @@ if (Meteor.isClient) {
 
     hideCompleted: function() {
       return Session.get('hideCompleted');
+    },
+  });
+
+  Template.weekInfo.helpers({
+    tasks: function() {
+      return Tasks.find({}); // TODO pull only from the selected week
+    },
+  });
+
+  Template.task.helpers({
+
+  });
+
+  Template.task.events({
+    'click .delete-task': function() {
+      Meteor.call('deleteTask', this._id);
     },
   });
 
@@ -41,6 +63,21 @@ if (Meteor.isClient) {
       event.target.text.value = '';
     },
 
+    'submit .new-task': function(event) {
+      // Prevent default browser form submit
+      event.preventDefault();
+
+      // Get value from form element
+      var text = event.target.text.value;
+      var percentage = event.target.percentage.value;
+
+      // Insert a week into the collection
+      Meteor.call('addTask', text, percentage);
+
+      // Clear form
+      event.target.text.value = '';
+    },
+
     'change .hide-completed input': function(event) {
       Session.set('hideCompleted', event.target.checked);
     },
@@ -52,7 +89,7 @@ if (Meteor.isClient) {
       Meteor.call('setChecked', this._id, !this.checked);
     },
 
-    'click .delete': function() {
+    'click .delete-week': function() {
       // SOFT DELETE
       Meteor.call('deleteWeek', this._id);
     },
@@ -64,6 +101,7 @@ if (Meteor.isClient) {
 
 }
 
+// WEEK
 Meteor.methods({
   addWeek: function(text) {
     // Make sure the user is logged in before inserting a week
@@ -87,5 +125,25 @@ Meteor.methods({
 
   setChecked: function(weekId, setChecked) {
     Weeks.update(weekId, { $set: { checked: setChecked} });
+  },
+
+  // TASK
+  addTask: function(text, percentage) {
+    // Make sure the user is logged in before inserting a week
+    if (!Meteor.userId()) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    Tasks.insert({
+      text: text,
+      percentage: percentage,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meteor.user().username,
+    });
+  },
+
+  deleteTask: function(taskId) {
+    Tasks.remove(taskId);
   },
 });
