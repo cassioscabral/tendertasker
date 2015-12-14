@@ -30,18 +30,22 @@ if (Meteor.isClient) {
     hideCompleted: function() {
       return Session.get('hideCompleted');
     },
+
+    subTasks: function() {
+      return Tasks.find({week_id: this.week_id, parent_id: this._id});
+    },
+
   });
 
   Template.weekInfo.helpers({
+
     tasks: function() {
       return Tasks.find({week_id: this._id, parent_id: {$ne: true} }); // TODO pull only from the selected week
     },
   });
 
   Template.task.helpers({
-    subTasks: function() {
-      return Tasks.find({week_id: this.week_id, parent_id: this._id});
-    },
+
   });
 
   Template.task.events({
